@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat simples</title>
+    <script src="https://unpkg.com/vue@3"></script>
+
+</head>
+
+<body>
+
+    <h1>Chat simples</h1>
+    <div id="app">
+        <h4>mensagens</h4>
+        <input type="text" v-model="texto">
+        <button @click="enviarMsg">enviar mensagem</button>
+        <div>
+            <div v-for="msg in mensagens">
+                {{msg}}
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import database from "./conexaoweb.js"
+        import { get, set, ref, onValue } from "https://www.gstatic.com/firebasejs/9.8.1/firebase-database.js"
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    mensagens: {},
+                    texto: ""
+                }
+            },
+            mounted() {
+                let self = this;
+                console.log("montei a aplicação");
+                let mensagens = ref(database, "/mensagens")
+                onValue(mensagens, (snap) => {
+                    let dados = snap.val()
+                    console.log("dados", dados);
+                    self.mensagens = dados
+                })
+            },
+            methods: {
+                enviarMsg() {
+                    console.log("cliquei no botão", this.texto);
+                    let id = parseInt(Math.random() * 100000)
+                    console.log(id);
+                    let mensagens = ref(database, "/mensagens/msg-"+id)
+                    set(mensagens,this.texto)
+                    this.texto = ""
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
